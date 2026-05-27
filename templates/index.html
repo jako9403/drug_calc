@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drug Half-Life Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          <h1>Drug Half-Life Calculator</h1>
+        </div>
+        <p class="subtitle">Visualise how drug concentration decays over time</p>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Controls panel -->
+      <section class="panel controls-panel">
+        <h2 class="panel-title">Parameters</h2>
+
+        <div class="field">
+          <label for="drug-select">Drug</label>
+          <select id="drug-select">
+            <option value="" disabled selected>Loading drugs…</option>
+          </select>
+        </div>
+
+        <div id="drug-info" class="drug-info hidden">
+          <span class="badge" id="drug-category"></span>
+          <div class="info-row">
+            <span class="info-label">Half-life</span>
+            <span class="info-value" id="drug-halflife"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Typical dose</span>
+            <span class="info-value" id="drug-typical-dose"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Max daily</span>
+            <span class="info-value" id="drug-max-daily"></span>
+          </div>
+          <p class="info-notes" id="drug-notes"></p>
+        </div>
+
+        <div class="field">
+          <label for="dose-input">Dose (mg)</label>
+          <input type="number" id="dose-input" min="0.1" step="any" placeholder="Uses typical dose if empty">
+        </div>
+
+        <div class="field">
+          <label for="hours-input">Time span (hours)</label>
+          <input type="number" id="hours-input" min="0.5" step="any" placeholder="Auto (6 × half-life)">
+        </div>
+
+        <button id="calculate-btn" class="btn-primary" disabled>Calculate</button>
+      </section>
+
+      <!-- Chart panel -->
+      <section class="panel chart-panel">
+        <h2 class="panel-title">Concentration Decay Curve</h2>
+        <div class="chart-container">
+          <canvas id="decay-chart"></canvas>
+          <div id="chart-placeholder" class="chart-placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <p>Select a drug and click <strong>Calculate</strong> to see the decay curve</p>
+          </div>
+        </div>
+
+        <!-- Summary stats shown after calculation -->
+        <div id="stats" class="stats hidden">
+          <div class="stat">
+            <span class="stat-value" id="stat-initial"></span>
+            <span class="stat-label">Initial dose</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-halflife"></span>
+            <span class="stat-label">Half-life</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-quarter"></span>
+            <span class="stat-label">25 % remaining at</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-ten"></span>
+            <span class="stat-label">10 % remaining at</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>For educational purposes only — not medical advice. Actual pharmacokinetics vary by individual.</p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
