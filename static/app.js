@@ -35,6 +35,10 @@
   const doseLogEmpty    = document.getElementById("dose-log-empty");
   const doseTableWrap   = document.getElementById("dose-table-wrap");
   const clearLogBtn     = document.getElementById("clear-log-btn");
+  const weightInput     = document.getElementById("weight-input");
+  const ageInput        = document.getElementById("age-input");
+  const genderSelect    = document.getElementById("gender-select");
+  const adjPreview      = document.getElementById("adj-preview");
 
   let drugs = {};           // keyed by slug
   let decayChart = null;    // single-drug Chart.js instance
@@ -76,6 +80,66 @@
     }
   });
 
+  // ── Patient profile helpers ────────────────────────────────────
+
+  function getProfile() {
+    const w = parseFloat(weightInput.value) || null;
+    const a = parseInt(ageInput.value, 10) || null;
+    const g = genderSelect.value || null;
+    return { weight_kg: w, age: a, gender: g };
+  }
+
+  /** Compute adjusted half-life client-side (mirrors backend logic). */
+  function adjustedHalfLife(drugData) {
+    let hl = drugData.half_life_hr;
+    const adj = drugData.adjustments;
+    const profile = getProfile();
+    const notes = [];
+    if (!adj) return { hl, notes };
+
+    if (profile.age != null) {
+      if (profile.age >= 65 && adj.elderly_hl_mult !== 1.0) {
+        hl *= adj.elderly_hl_mult;
+        notes.push("Age ≥65: t½ ×" + adj.elderly_hl_mult);
+      } else if (profile.age < 18 && adj.pediatric_hl_mult !== 1.0) {
+        hl *= adj.pediatric_hl_mult;
+        notes.push("Age <18: t½ ×" + adj.pediatric_hl_mult);
+      }
+    }
+    if (profile.gender === "female" && adj.female_hl_mult !== 1.0) {
+      hl *= adj.female_hl_mult;
+      notes.push("Female: t½ ×" + adj.female_hl_mult);
+    } else if (profile.gender === "male" && adj.male_hl_mult !== 1.0) {
+      hl *= adj.male_hl_mult;
+      notes.push("Male: t½ ×" + adj.male_hl_mult);
+    }
+
+    // Weight-based dose hint
+    if (adj.weight_based && adj.dose_per_kg && profile.weight_kg) {
+      const suggestedDose = Math.round(adj.dose_per_kg * profile.weight_kg);
+      notes.push("Weight-based dose: ~" + suggestedDose + " mg (" + adj.dose_per_kg + " mg/kg)");
+    }
+
+    return { hl: Math.round(hl * 1000) / 1000, notes };
+  }
+
+  function updateAdjPreview() {
+    const drugKey = drugSelect.value;
+    if (!drugKey || !drugs[drugKey]) { adjPreview.classList.add("hidden"); return; }
+    const { hl, notes } = adjustedHalfLife(drugs[drugKey]);
+    if (notes.length === 0) { adjPreview.classList.add("hidden"); return; }
+    adjPreview.classList.remove("hidden");
+    adjPreview.innerHTML =
+      '<strong>Adjusted t½: ' + formatHours(hl) + '</strong>' +
+      '<span class="adj-base">(base: ' + formatHours(drugs[drugKey].half_life_hr) + ')</span>' +
+      '<ul>' + notes.map(n => '<li>' + n + '</li>').join('') + '</ul>';
+  }
+
+  // Update preview when profile fields change
+  weightInput.addEventListener("input", updateAdjPreview);
+  ageInput.addEventListener("input", updateAdjPreview);
+  genderSelect.addEventListener("change", updateAdjPreview);
+
   // ── Drug select ───────────────────────────────────────────────
 
   drugSelect.addEventListener("change", () => {
@@ -92,6 +156,7 @@
     doseInput.placeholder = d.typical_dose_mg + " mg (typical)";
     calcBtn.disabled = false;
     takeDoseBtn.disabled = false;
+    updateAdjPreview();
   });
 
   // ── Calculate (single drug) ───────────────────────────────────
@@ -109,6 +174,10 @@
     const payload = { drug: drugKey };
     const doseVal = parseFloat(doseInput.value);
     if (doseVal > 0) payload.dose_mg = doseVal;
+    const profile = getProfile();
+    if (profile.age) payload.age = profile.age;
+    if (profile.gender) payload.gender = profile.gender;
+    if (profile.weight_kg) payload.weight_kg = profile.weight_kg;
 
     try {
       const res = await fetch("/api/calculate", {
@@ -136,19 +205,25 @@
     if (!drugKey) return;
     const d = drugs[drugKey];
     const doseVal = parseFloat(doseInput.value) || d.typical_dose_mg;
+    const { hl } = adjustedHalfLife(d);
 
     const color = COLORS[colorIndex % COLORS.length];
     colorIndex++;
 
+    const profile = getProfile();
     doseLog.push({
       id: Date.now() + Math.random(),
       drugKey,
       drugName: d.name,
       dose_mg: doseVal,
-      half_life_hr: d.half_life_hr,
+      half_life_hr: hl,
+      base_half_life_hr: d.half_life_hr,
       category: d.category,
       takenAt: new Date(),
       color,
+      age: profile.age,
+      gender: profile.gender,
+      weight_kg: profile.weight_kg,
     });
 
     renderDoseTable();
@@ -461,7 +536,8 @@
     const hl = data.half_life_hr;
     const dose = data.initial_dose_mg;
     document.getElementById("stat-initial").textContent  = dose + " mg";
-    document.getElementById("stat-halflife").textContent  = formatHours(hl);
+    const hlText = formatHours(hl) + (data.base_half_life_hr !== hl ? " (adj)" : "");
+    document.getElementById("stat-halflife").textContent = hlText;
     document.getElementById("stat-quarter").textContent  = formatHours(hl * 2);
     document.getElementById("stat-ten").textContent      = formatHours(hl * Math.log2(10));
     statsDiv.classList.remove("hidden");

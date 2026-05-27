@@ -166,7 +166,63 @@ body {
   line-height: 1.45;
 }
 
-/* ── Buttons ────────────────────────────────────────────────────── */
+/* ── Patient profile ────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: .75rem 0;
+}
+.section-subtitle {
+  font-size: .85rem;
+  font-weight: 600;
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.optional-tag {
+  font-size: .65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-secondary);
+  background: var(--bg);
+  padding: .1rem .4rem;
+  border-radius: 4px;
+}
+.field-row {
+  display: flex;
+  gap: .6rem;
+}
+.field-half { flex: 1; }
+
+/* ── Adjustment preview ─────────────────────────────────────── */
+.adj-preview {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: .65rem .85rem;
+  margin-bottom: .75rem;
+  font-size: .82rem;
+  line-height: 1.5;
+  animation: fadeIn .2s ease;
+}
+.adj-preview.hidden { display: none; }
+.adj-preview strong { color: #c2410c; }
+.adj-preview .adj-base {
+  font-size: .75rem;
+  color: var(--text-secondary);
+  margin-left: .4rem;
+}
+.adj-preview ul {
+  margin: .3rem 0 0 1.1rem;
+  padding: 0;
+  font-size: .78rem;
+  color: var(--text-secondary);
+}
+.adj-preview li { margin-bottom: .1rem; }
+
+/* ── Buttons ───────────────────────────────────────────────── */
 .btn-row {
   display: flex;
   gap: .6rem;

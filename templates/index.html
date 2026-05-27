@@ -70,6 +70,32 @@
           <input type="number" id="dose-input" min="0.1" step="any" placeholder="Uses typical dose if empty">
         </div>
 
+        <!-- Patient profile -->
+        <div class="divider"></div>
+        <h3 class="section-subtitle">Patient Profile <span class="optional-tag">optional</span></h3>
+
+        <div class="field-row">
+          <div class="field field-half">
+            <label for="weight-input">Weight (kg)</label>
+            <input type="number" id="weight-input" min="1" max="300" step="0.1" placeholder="e.g. 70">
+          </div>
+          <div class="field field-half">
+            <label for="age-input">Age</label>
+            <input type="number" id="age-input" min="1" max="120" step="1" placeholder="e.g. 30">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="gender-select">Sex</label>
+          <select id="gender-select">
+            <option value="">Not specified</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        <div id="adj-preview" class="adj-preview hidden"></div>
+
         <div class="btn-row">
           <button id="take-dose-btn" class="btn-success" disabled>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
