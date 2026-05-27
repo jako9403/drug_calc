@@ -30,6 +30,17 @@
       <section class="panel controls-panel">
         <h2 class="panel-title">Parameters</h2>
 
+        <!-- Search + dropdown -->
+        <div class="field">
+          <label for="drug-search">Search drug</label>
+          <div class="search-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="drug-search" placeholder="Type to filter…" autocomplete="off">
+          </div>
+        </div>
+
         <div class="field">
           <label for="drug-select">Drug</label>
           <select id="drug-select">
@@ -59,47 +70,95 @@
           <input type="number" id="dose-input" min="0.1" step="any" placeholder="Uses typical dose if empty">
         </div>
 
-        <div class="field">
-          <label for="hours-input">Time span (hours)</label>
-          <input type="number" id="hours-input" min="0.5" step="any" placeholder="Auto (6 × half-life)">
-        </div>
-
-        <button id="calculate-btn" class="btn-primary" disabled>Calculate</button>
-      </section>
-
-      <!-- Chart panel -->
-      <section class="panel chart-panel">
-        <h2 class="panel-title">Concentration Decay Curve</h2>
-        <div class="chart-container">
-          <canvas id="decay-chart"></canvas>
-          <div id="chart-placeholder" class="chart-placeholder">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-            <p>Select a drug and click <strong>Calculate</strong> to see the decay curve</p>
-          </div>
-        </div>
-
-        <!-- Summary stats shown after calculation -->
-        <div id="stats" class="stats hidden">
-          <div class="stat">
-            <span class="stat-value" id="stat-initial"></span>
-            <span class="stat-label">Initial dose</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value" id="stat-halflife"></span>
-            <span class="stat-label">Half-life</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value" id="stat-quarter"></span>
-            <span class="stat-label">25 % remaining at</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value" id="stat-ten"></span>
-            <span class="stat-label">10 % remaining at</span>
-          </div>
+        <div class="btn-row">
+          <button id="take-dose-btn" class="btn-success" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Take Dose Now
+          </button>
+          <button id="calculate-btn" class="btn-primary" disabled>Calculate</button>
         </div>
       </section>
+
+      <!-- Right column -->
+      <div class="right-col">
+        <!-- 24-hour timeline chart -->
+        <section class="panel chart-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">24-Hour Timeline</h2>
+            <div id="legend" class="legend"></div>
+          </div>
+          <div class="chart-container chart-container-timeline">
+            <canvas id="timeline-chart"></canvas>
+            <div id="timeline-placeholder" class="chart-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              <p>Take a dose to see the 24-hour concentration timeline</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Single-drug decay curve -->
+        <section class="panel chart-panel">
+          <h2 class="panel-title">Single Drug Decay Curve</h2>
+          <div class="chart-container">
+            <canvas id="decay-chart"></canvas>
+            <div id="chart-placeholder" class="chart-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              <p>Select a drug and click <strong>Calculate</strong> to see the decay curve</p>
+            </div>
+          </div>
+
+          <div id="stats" class="stats hidden">
+            <div class="stat">
+              <span class="stat-value" id="stat-initial"></span>
+              <span class="stat-label">Initial dose</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="stat-halflife"></span>
+              <span class="stat-label">Half-life</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="stat-quarter"></span>
+              <span class="stat-label">25 % remaining at</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="stat-ten"></span>
+              <span class="stat-label">10 % remaining at</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Dose log table -->
+        <section class="panel" id="dose-log-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Dose Log</h2>
+            <button id="clear-log-btn" class="btn-text hidden">Clear all</button>
+          </div>
+          <div id="dose-log-empty" class="chart-placeholder" style="position:relative;min-height:80px;">
+            <p>No doses taken yet. Select a drug and click <strong>Take Dose Now</strong>.</p>
+          </div>
+          <div class="table-wrap hidden" id="dose-table-wrap">
+            <table class="dose-table">
+              <thead>
+                <tr>
+                  <th>Drug</th>
+                  <th>Dose</th>
+                  <th>Time Taken</th>
+                  <th>Elapsed</th>
+                  <th>Half-life</th>
+                  <th>Remaining</th>
+                  <th>% Left</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="dose-log-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer class="footer">
