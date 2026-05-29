@@ -1,0 +1,217 @@
+"""Drug pharmacokinetic database.
+
+Each entry stores data sourced from standard references (Goodman & Gilman,
+DrugBank, FDA labels).  Half-life values represent typical adult (18-65,
+~70 kg) elimination half-lives under normal hepatic/renal function.
+
+adjustments — optional per-drug modifiers:
+  elderly_hl_mult  : multiplier applied to t½ when age >= 65
+  pediatric_hl_mult: multiplier applied to t½ when age < 18
+  female_hl_mult   : multiplier applied to t½ for female patients
+  male_hl_mult     : multiplier applied to t½ for male patients
+  weight_based     : if true, dose is scaled by mg/kg
+  dose_per_kg      : mg/kg reference dose (if weight_based)
+  ref_weight_kg    : reference body weight the base t½ was measured at
+"""
+
+from __future__ import annotations
+
+DRUGS: dict[str, dict] = {
+    "acetaminophen": {
+        "name": "Acetaminophen (Paracetamol)",
+        "half_life_hr": 2.5,
+        "typical_dose_mg": 500,
+        "max_daily_mg": 4000,
+        "category": "Analgesic / Antipyretic",
+        "notes": "Half-life may increase to 4+ hours in hepatic impairment.",
+        "adjustments": {
+            "elderly_hl_mult": 1.3,
+            "pediatric_hl_mult": 0.7,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": True,
+            "dose_per_kg": 10.0,
+            "ref_weight_kg": 70,
+        },
+    },
+    "caffeine": {
+        "name": "Caffeine",
+        "half_life_hr": 5.0,
+        "typical_dose_mg": 100,
+        "max_daily_mg": 400,
+        "category": "Stimulant",
+        "notes": "Half-life ranges 3-7 h; longer in neonates and pregnancy.",
+        "adjustments": {
+            "elderly_hl_mult": 1.3,
+            "pediatric_hl_mult": 1.6,
+            "female_hl_mult": 1.2,
+            "male_hl_mult": 1.0,
+            "weight_based": False,
+            "ref_weight_kg": 70,
+        },
+    },
+    "ibuprofen": {
+        "name": "Ibuprofen",
+        "half_life_hr": 2.0,
+        "typical_dose_mg": 400,
+        "max_daily_mg": 3200,
+        "category": "NSAID",
+        "notes": "Rapid absorption; peak plasma at ~1-2 h.",
+        "adjustments": {
+            "elderly_hl_mult": 1.4,
+            "pediatric_hl_mult": 0.8,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": True,
+            "dose_per_kg": 5.0,
+            "ref_weight_kg": 70,
+        },
+    },
+    "aspirin": {
+        "name": "Aspirin (Acetylsalicylic Acid)",
+        "half_life_hr": 3.5,
+        "typical_dose_mg": 500,
+        "max_daily_mg": 4000,
+        "category": "NSAID / Antiplatelet",
+        "notes": "Parent compound t½ ~15-20 min; salicylate t½ ~3.5 h.",
+        "adjustments": {
+            "elderly_hl_mult": 1.2,
+            "pediatric_hl_mult": 0.9,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": False,
+            "ref_weight_kg": 70,
+        },
+    },
+    "amoxicillin": {
+        "name": "Amoxicillin",
+        "half_life_hr": 1.0,
+        "typical_dose_mg": 500,
+        "max_daily_mg": 3000,
+        "category": "Antibiotic (Penicillin)",
+        "notes": "Half-life prolonged in renal impairment.",
+        "adjustments": {
+            "elderly_hl_mult": 1.5,
+            "pediatric_hl_mult": 1.5,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": True,
+            "dose_per_kg": 12.5,
+            "ref_weight_kg": 70,
+        },
+    },
+    "loratadine": {
+        "name": "Loratadine (Claritin)",
+        "half_life_hr": 8.0,
+        "typical_dose_mg": 10,
+        "max_daily_mg": 10,
+        "category": "Antihistamine",
+        "notes": "Active metabolite desloratadine t½ ~28 h.",
+        "adjustments": {
+            "elderly_hl_mult": 1.5,
+            "pediatric_hl_mult": 1.0,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": False,
+            "ref_weight_kg": 70,
+        },
+    },
+    "diphenhydramine": {
+        "name": "Diphenhydramine (Benadryl)",
+        "half_life_hr": 4.5,
+        "typical_dose_mg": 25,
+        "max_daily_mg": 300,
+        "category": "Antihistamine",
+        "notes": "Sedating first-generation antihistamine.",
+        "adjustments": {
+            "elderly_hl_mult": 1.6,
+            "pediatric_hl_mult": 0.7,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": True,
+            "dose_per_kg": 1.25,
+            "ref_weight_kg": 70,
+        },
+    },
+    "metformin": {
+        "name": "Metformin",
+        "half_life_hr": 5.0,
+        "typical_dose_mg": 500,
+        "max_daily_mg": 2550,
+        "category": "Antidiabetic",
+        "notes": "Eliminated renally; t½ increases in renal impairment.",
+        "adjustments": {
+            "elderly_hl_mult": 1.4,
+            "pediatric_hl_mult": 1.0,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": False,
+            "ref_weight_kg": 70,
+        },
+    },
+    "omeprazole": {
+        "name": "Omeprazole (Prilosec)",
+        "half_life_hr": 1.0,
+        "typical_dose_mg": 20,
+        "max_daily_mg": 40,
+        "category": "Proton Pump Inhibitor",
+        "notes": "Short plasma t½ but prolonged pharmacodynamic effect.",
+        "adjustments": {
+            "elderly_hl_mult": 1.5,
+            "pediatric_hl_mult": 0.8,
+            "female_hl_mult": 1.0,
+            "male_hl_mult": 1.0,
+            "weight_based": False,
+            "ref_weight_kg": 70,
+        },
+    },
+    "melatonin": {
+        "name": "Melatonin",
+        "half_life_hr": 0.75,
+        "typical_dose_mg": 3,
+        "max_daily_mg": 10,
+        "category": "Supplement / Sleep Aid",
+        "notes": "Rapid first-pass metabolism; t½ ~40-50 min.",
+        "adjustments": {
+            "elderly_hl_mult": 1.2,
+            "pediatric_hl_mult": 1.0,
+            "female_hl_mult": 1.1,
+            "male_hl_mult": 1.0,
+            "weight_based": False,
+            "ref_weight_kg": 70,
+        },
+    },
+    "diazepam": {
+        "name": "Diazepam (Valium)",
+        "half_life_hr": 40.0,
+        "typical_dose_mg": 5,
+        "max_daily_mg": 40,
+        "category": "Benzodiazepine",
+        "notes": "Active metabolite desmethyldiazepam t½ up to 100 h.",
+        "adjustments": {
+            "elderly_hl_mult": 2.0,
+            "pediatric_hl_mult": 0.5,
+            "female_hl_mult": 1.15,
+            "male_hl_mult": 1.0,
+            "weight_based": True,
+            "dose_per_kg": 0.1,
+            "ref_weight_kg": 70,
+        },
+    },
+    "sertraline": {
+        "name": "Sertraline (Zoloft)",
+        "half_life_hr": 26.0,
+        "typical_dose_mg": 50,
+        "max_daily_mg": 200,
+        "category": "SSRI Antidepressant",
+        "notes": "Steady state reached in ~1 week.",
+        "adjustments": {
+            "elderly_hl_mult": 1.5,
+            "pediatric_hl_mult": 1.0,
+            "female_hl_mult": 1.15,
+            "male_hl_mult": 1.0,
+            "weight_based": False,
+            "ref_weight_kg": 70,
+        },
+    },
+}

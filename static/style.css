@@ -404,11 +404,27 @@ body {
 .pct-mid  { background: rgba(245,158,11,0.12); color: #d97706; }
 .pct-low  { background: rgba(239,68,68,0.1);   color: #dc2626; }
 
-/* ── Footer ─────────────────────────────────────────────────────── */
+/* ── Footer & disclaimer ──────────────────────────────────────── */
 .footer {
-  text-align: center;
   padding: 1.5rem 0 2rem;
   font-size: .78rem;
+  color: var(--text-secondary);
+}
+.disclaimer {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  font-size: .82rem;
+  line-height: 1.55;
+  color: #7f1d1d;
+}
+.disclaimer strong { color: #991b1b; }
+.disclaimer p { margin-top: .35rem; }
+.footer-copy {
+  text-align: center;
   color: var(--text-secondary);
 }
 
