@@ -10,200 +10,83 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <div id="disclaimer-overlay" class="overlay">
+    <div class="overlay-card">
+      <h2>⚠️ Medical Disclaimer</h2>
+      <p>This tool is for <strong>educational and informational purposes only</strong>.</p>
+      <ul>
+        <li>It is <strong>not a substitute</strong> for professional medical advice, diagnosis, or treatment.</li>
+        <li>Half-life values are population averages and do not account for individual variation, drug interactions, organ impairment, genetic polymorphisms, or other clinical factors.</li>
+        <li><strong>Never adjust medication based solely on this calculator.</strong></li>
+        <li>Always consult a qualified healthcare provider for medical decisions.</li>
+      </ul>
+      <label class="checkbox-label"><input type="checkbox" id="disclaimer-accept"> I understand this is not medical advice</label>
+      <button id="disclaimer-continue" class="btn-primary" disabled>Continue</button>
+    </div>
+  </div>
   <div class="app">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-inner">
-        <div class="logo">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-            <path d="M12 6v6l4 2"/>
-          </svg>
-          <h1>Drug Half-Life Calculator</h1>
-        </div>
-        <p class="subtitle">Visualise how drug concentration decays over time</p>
+    <header class="header"><div class="header-inner">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+        <h1>Drug Half-Life Calculator</h1>
       </div>
-    </header>
-
+      <p class="subtitle">Visualise how drug concentration decays over time</p>
+    </div></header>
     <main class="main">
-      <!-- Controls panel -->
       <section class="panel controls-panel">
         <h2 class="panel-title">Parameters</h2>
-
-        <!-- Search + dropdown -->
-        <div class="field">
-          <label for="drug-search">Search drug</label>
-          <div class="search-wrap">
-            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" id="drug-search" placeholder="Type to filter…" autocomplete="off">
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="drug-select">Drug</label>
-          <select id="drug-select">
-            <option value="" disabled selected>Loading drugs…</option>
-          </select>
-        </div>
-
+        <div class="field"><label for="drug-search">Search drug</label>
+          <div class="search-wrap"><svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="drug-search" placeholder="Type to filter…" autocomplete="off"></div></div>
+        <div class="field"><label for="drug-select">Drug</label>
+          <select id="drug-select"><option value="" disabled selected>Loading drugs…</option></select>
+          <button id="custom-drug-btn" class="btn-link" type="button">+ Add custom drug</button></div>
         <div id="drug-info" class="drug-info hidden">
           <span class="badge" id="drug-category"></span>
-          <div class="info-row">
-            <span class="info-label">Half-life</span>
-            <span class="info-value" id="drug-halflife"></span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Typical dose</span>
-            <span class="info-value" id="drug-typical-dose"></span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Max daily</span>
-            <span class="info-value" id="drug-max-daily"></span>
-          </div>
+          <div class="info-row"><span class="info-label">Half-life</span><span class="info-value" id="drug-halflife"></span></div>
+          <div class="info-row"><span class="info-label">Range</span><span class="info-value" id="drug-hl-range"></span></div>
+          <div class="info-row"><span class="info-label">Typical dose</span><span class="info-value" id="drug-typical-dose"></span></div>
+          <div class="info-row"><span class="info-label">Max daily</span><span class="info-value" id="drug-max-daily"></span></div>
           <p class="info-notes" id="drug-notes"></p>
+          <div id="drug-sources" class="info-sources"></div>
         </div>
-
-        <div class="field">
-          <label for="dose-input">Dose (mg)</label>
-          <input type="number" id="dose-input" min="0.1" step="any" placeholder="Uses typical dose if empty">
-        </div>
-
-        <!-- Patient profile -->
+        <div class="field"><label for="dose-input">Dose (mg)</label><input type="number" id="dose-input" min="0.1" step="any" placeholder="Uses typical dose if empty"></div>
+        <div class="field"><label for="dose-time-input">Dose time</label><div class="field-row"><input type="datetime-local" id="dose-time-input" class="field-grow"><button id="dose-time-now-btn" class="btn-sm" type="button" title="Set to now">Now</button></div></div>
+        <div class="field"><label>Repeat schedule <span class="optional-tag">optional</span></label><div class="field-row"><select id="schedule-select" class="field-grow"><option value="">No repeat</option><option value="4">Every 4 h</option><option value="6">Every 6 h</option><option value="8">Every 8 h</option><option value="12">Every 12 h</option><option value="24">Every 24 h</option></select><input type="number" id="schedule-count" min="1" max="20" value="3" style="width:60px" title="Number of doses"></div></div>
         <div class="divider"></div>
         <h3 class="section-subtitle">Patient Profile <span class="optional-tag">optional</span></h3>
-
-        <div class="field-row">
-          <div class="field field-half">
-            <label for="weight-input">Weight (kg)</label>
-            <input type="number" id="weight-input" min="1" max="300" step="0.1" placeholder="e.g. 70">
-          </div>
-          <div class="field field-half">
-            <label for="age-input">Age</label>
-            <input type="number" id="age-input" min="1" max="120" step="1" placeholder="e.g. 30">
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="gender-select">Sex</label>
-          <select id="gender-select">
-            <option value="">Not specified</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-        </div>
-
+        <div class="field-row"><div class="field field-half"><label for="weight-input">Weight (kg)</label><input type="number" id="weight-input" min="1" max="300" step="0.1" placeholder="e.g. 70"></div><div class="field field-half"><label for="age-input">Age</label><input type="number" id="age-input" min="1" max="120" step="1" placeholder="e.g. 30"></div></div>
+        <div class="field"><label for="gender-select">Sex</label><select id="gender-select"><option value="">Not specified</option><option value="male">Male</option><option value="female">Female</option></select></div>
         <div id="adj-preview" class="adj-preview hidden"></div>
-
         <div class="btn-row">
-          <button id="take-dose-btn" class="btn-success" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Take Dose Now
-          </button>
+          <button id="take-dose-btn" class="btn-success" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Take Dose</button>
           <button id="calculate-btn" class="btn-primary" disabled>Calculate</button>
         </div>
       </section>
-
-      <!-- Right column -->
       <div class="right-col">
-        <!-- 24-hour timeline chart -->
-        <section class="panel chart-panel">
-          <div class="panel-header">
-            <h2 class="panel-title">24-Hour Timeline</h2>
-            <div id="legend" class="legend"></div>
-          </div>
-          <div class="chart-container chart-container-timeline">
-            <canvas id="timeline-chart"></canvas>
-            <div id="timeline-placeholder" class="chart-placeholder">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-              <p>Take a dose to see the 24-hour concentration timeline</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Single-drug decay curve -->
-        <section class="panel chart-panel">
-          <h2 class="panel-title">Single Drug Decay Curve</h2>
-          <div class="chart-container">
-            <canvas id="decay-chart"></canvas>
-            <div id="chart-placeholder" class="chart-placeholder">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-              <p>Select a drug and click <strong>Calculate</strong> to see the decay curve</p>
-            </div>
-          </div>
-
-          <div id="stats" class="stats hidden">
-            <div class="stat">
-              <span class="stat-value" id="stat-initial"></span>
-              <span class="stat-label">Initial dose</span>
-            </div>
-            <div class="stat">
-              <span class="stat-value" id="stat-halflife"></span>
-              <span class="stat-label">Half-life</span>
-            </div>
-            <div class="stat">
-              <span class="stat-value" id="stat-quarter"></span>
-              <span class="stat-label">25 % remaining at</span>
-            </div>
-            <div class="stat">
-              <span class="stat-value" id="stat-ten"></span>
-              <span class="stat-label">10 % remaining at</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Dose log table -->
-        <section class="panel" id="dose-log-panel">
-          <div class="panel-header">
-            <h2 class="panel-title">Dose Log</h2>
-            <button id="clear-log-btn" class="btn-text hidden">Clear all</button>
-          </div>
-          <div id="dose-log-empty" class="chart-placeholder" style="position:relative;min-height:80px;">
-            <p>No doses taken yet. Select a drug and click <strong>Take Dose Now</strong>.</p>
-          </div>
-          <div class="table-wrap hidden" id="dose-table-wrap">
-            <table class="dose-table">
-              <thead>
-                <tr>
-                  <th>Drug</th>
-                  <th>Dose</th>
-                  <th>Time Taken</th>
-                  <th>Elapsed</th>
-                  <th>Half-life</th>
-                  <th>Remaining</th>
-                  <th>% Left</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="dose-log-body"></tbody>
-            </table>
-          </div>
-        </section>
+        <section class="panel chart-panel"><div class="panel-header"><h2 class="panel-title">24-Hour Timeline</h2><div id="legend" class="legend"></div></div>
+          <div class="chart-container chart-container-timeline"><canvas id="timeline-chart"></canvas><div id="timeline-placeholder" class="chart-placeholder"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>Take a dose to see the 24-hour concentration timeline</p></div></div></section>
+        <section class="panel chart-panel"><div class="panel-header"><h2 class="panel-title">Single Drug Decay Curve</h2><label class="checkbox-label-inline"><input type="checkbox" id="show-range-cb" checked> Show range</label></div>
+          <div class="chart-container"><canvas id="decay-chart"></canvas><div id="chart-placeholder" class="chart-placeholder"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>Select a drug and click <strong>Calculate</strong> to see the decay curve</p></div></div>
+          <div id="stats" class="stats hidden"><div class="stat"><span class="stat-value" id="stat-initial"></span><span class="stat-label">Initial dose</span></div><div class="stat"><span class="stat-value" id="stat-halflife"></span><span class="stat-label">Half-life</span></div><div class="stat"><span class="stat-value" id="stat-quarter"></span><span class="stat-label">25 % remaining at</span></div><div class="stat"><span class="stat-value" id="stat-ten"></span><span class="stat-label">10 % remaining at</span></div></div></section>
+        <section class="panel" id="dose-log-panel"><div class="panel-header"><h2 class="panel-title">Dose Log</h2><div class="btn-group"><button id="export-csv-btn" class="btn-sm hidden">📄 CSV</button><button id="export-json-btn" class="btn-sm hidden">📋 JSON</button><button id="clear-log-btn" class="btn-text hidden">Clear all</button></div></div>
+          <div id="dose-log-empty" class="chart-placeholder" style="position:relative;min-height:80px;"><p>No doses taken yet. Select a drug and click <strong>Take Dose</strong>.</p></div>
+          <div class="table-wrap hidden" id="dose-table-wrap"><table class="dose-table"><thead><tr><th>Drug</th><th>Dose</th><th>Time Taken</th><th>Elapsed</th><th>Half-life</th><th>Remaining</th><th>% Left</th><th></th></tr></thead><tbody id="dose-log-body"></tbody></table></div>
+          <p id="save-status" class="save-status hidden"></p></section>
       </div>
     </main>
-
     <footer class="footer">
-      <div class="disclaimer">
-        <strong>⚠️ Medical Disclaimer</strong>
-        <p>
-          This tool is for <strong>educational and informational purposes only</strong>.
-          It is <strong>not a substitute for professional medical advice, diagnosis, or treatment</strong>.
-          Half-life values are population averages and do not account for individual
-          variation, drug interactions, organ impairment, genetic polymorphisms, or
-          other clinical factors. <strong>Never adjust medication based solely on this
-          calculator.</strong> Always consult a qualified healthcare provider for
-          medical decisions.
-        </p>
-      </div>
+      <div class="disclaimer"><strong>⚠️ Medical Disclaimer</strong><p>This tool is for <strong>educational and informational purposes only</strong>. It is <strong>not a substitute for professional medical advice, diagnosis, or treatment</strong>. Half-life values are population averages and do not account for individual variation, drug interactions, organ impairment, genetic polymorphisms, or other clinical factors. <strong>Never adjust medication based solely on this calculator.</strong> Always consult a qualified healthcare provider for medical decisions.</p></div>
       <p class="footer-copy">&copy; 2026 Drug Half-Life Calculator &mdash; Educational use only.</p>
     </footer>
   </div>
-
+  <div id="custom-drug-modal" class="modal-overlay hidden"><div class="modal"><h3>Add Custom Drug</h3>
+    <div class="field"><label>Drug name</label><input type="text" id="cd-name" placeholder="e.g. My Drug"></div>
+    <div class="field-row"><div class="field field-half"><label>Half-life (hours)</label><input type="number" id="cd-halflife" min="0.01" step="any" placeholder="e.g. 4"></div><div class="field field-half"><label>Typical dose (mg)</label><input type="number" id="cd-dose" min="0.01" step="any" placeholder="e.g. 500"></div></div>
+    <div class="field-row"><div class="field field-half"><label>Min half-life (h) <span class="optional-tag">opt</span></label><input type="number" id="cd-hl-min" min="0.01" step="any"></div><div class="field field-half"><label>Max half-life (h) <span class="optional-tag">opt</span></label><input type="number" id="cd-hl-max" min="0.01" step="any"></div></div>
+    <div class="field"><label>Category <span class="optional-tag">opt</span></label><input type="text" id="cd-category" placeholder="e.g. Analgesic"></div>
+    <div class="btn-row"><button id="cd-cancel" class="btn-text" type="button">Cancel</button><button id="cd-add" class="btn-primary" type="button">Add Drug</button></div>
+  </div></div>
   <script src="/static/app.js"></script>
 </body>
 </html>

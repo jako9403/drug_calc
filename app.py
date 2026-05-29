@@ -62,10 +62,12 @@ def get_drugs():
         out[key] = {
             "name": d["name"],
             "half_life_hr": d["half_life_hr"],
+            "hl_range_hr": d.get("hl_range_hr"),
             "typical_dose_mg": d["typical_dose_mg"],
             "max_daily_mg": d["max_daily_mg"],
             "category": d["category"],
             "notes": d["notes"],
+            "sources": d.get("sources", []),
             "adjustments": {
                 "elderly_hl_mult": adj.get("elderly_hl_mult", 1.0),
                 "pediatric_hl_mult": adj.get("pediatric_hl_mult", 1.0),
